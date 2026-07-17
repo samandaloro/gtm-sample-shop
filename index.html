@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moose &amp; Co. — Sample Shop</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- GTM: paste your <head> container snippet here -->
+</head>
+<body>
+  <!-- GTM: paste your <body> (noscript) snippet here -->
+  <header>
+    <a href="index.html" class="logo">🦌 Moose &amp; Co.</a>
+    <nav>
+      <a href="index.html">Shop</a>
+      <a href="cart.html" class="cart-link">Cart (<span id="cart-count">0</span>)</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>All Products</h1>
+    <p class="subtitle">A totally fake store for testing analytics. Nothing here ships.</p>
+    <div class="grid" id="product-grid"></div>
+  </main>
+
+  <footer>Sample store — not a real business.</footer>
+
+  <script src="shop.js"></script>
+  <script>
+    const grid = document.getElementById('product-grid');
+    grid.innerHTML = PRODUCTS.map(p => `
+      <a class="card" href="product.html?id=${p.id}">
+        <div class="thumb">${p.emoji}</div>
+        <div class="body">
+          <div class="brand">${p.brand}</div>
+          <div class="name">${p.name}</div>
+          <div class="price">${money(p.price)}</div>
+        </div>
+      </a>
+    `).join('');
+  </script>
+</body>
+</html>

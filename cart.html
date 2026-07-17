@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cart — Moose &amp; Co.</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- GTM: paste your <head> container snippet here -->
+</head>
+<body>
+  <!-- GTM: paste your <body> (noscript) snippet here -->
+  <header>
+    <a href="index.html" class="logo">🦌 Moose &amp; Co.</a>
+    <nav>
+      <a href="index.html">Shop</a>
+      <a href="cart.html" class="cart-link">Cart (<span id="cart-count">0</span>)</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Your Cart</h1>
+    <p class="subtitle">Checkout is fake — it just clears your cart.</p>
+    <div id="cart-body"></div>
+  </main>
+
+  <footer>Sample store — not a real business.</footer>
+
+  <script src="shop.js"></script>
+  <script>
+    function render() {
+      const cart = getCart();
+      const body = document.getElementById('cart-body');
+
+      if (cart.length === 0) {
+        body.innerHTML = '<p class="empty">Your cart is empty. <a href="index.html">Start shopping</a>.</p>';
+        return;
+      }
+
+      const rows = cart.map(item => {
+        const p = getProduct(item.id);
+        return `
+          <div class="cart-row">
+            <div class="emoji">${p.emoji}</div>
+            <div class="info">
+              <div class="name">${p.name}</div>
+              <div class="qty">Qty ${item.qty} · ${money(p.price)} each</div>
+            </div>
+            <div>${money(p.price * item.qty)}</div>
+            <button class="link-remove" data-id="${p.id}">Remove</button>
+          </div>`;
+      }).join('');
+
+      body.innerHTML = rows + `
+        <div class="cart-summary">
+          <div class="total"><span>Total</span><span>${money(cartTotal())}</span></div>
+          <button class="btn" id="checkout-btn">Checkout</button>
+        </div>`;
+
+      body.querySelectorAll('.link-remove').forEach(btn => {
+        btn.addEventListener('click', () => { removeFromCart(btn.dataset.id); render(); });
+      });
+
+      document.getElementById('checkout-btn').addEventListener('click', () => {
+        clearCart();
+        location.href = 'thank-you.html';
+      });
+    }
+    render();
+  </script>
+</body>
+</html>

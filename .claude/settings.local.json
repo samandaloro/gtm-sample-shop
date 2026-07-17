@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m http.server 8765)",
+      "Bash(curl -s -o /dev/null -w \"index.html %{http_code}\\\\n\" http://localhost:8765/index.html)",
+      "Bash(curl -s -o /dev/null -w \"product.html %{http_code}\\\\n\" http://localhost:8765/product.html)",
+      "Bash(curl -s -o /dev/null -w \"cart.html %{http_code}\\\\n\" http://localhost:8765/cart.html)",
+      "Bash(curl -s -o /dev/null -w \"thank-you.html %{http_code}\\\\n\" http://localhost:8765/thank-you.html)",
+      "Bash(kill %1)",
+      "Bash(gh auth *)",
+      "Bash(git config *)",
+      "Bash(exit 1)",
+      "Bash(git init *)",
+      "Bash(git branch *)",
+      "Bash(gh repo *)",
+      "Bash(echo \"--- exit: $? ---\")"
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product — Moose &amp; Co.</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- GTM: paste your <head> container snippet here -->
+</head>
+<body>
+  <!-- GTM: paste your <body> (noscript) snippet here -->
+  <header>
+    <a href="index.html" class="logo">🦌 Moose &amp; Co.</a>
+    <nav>
+      <a href="index.html">Shop</a>
+      <a href="cart.html" class="cart-link">Cart (<span id="cart-count">0</span>)</a>
+    </nav>
+  </header>
+
+  <main id="product-detail">
+    <!-- filled by JS -->
+  </main>
+
+  <footer>Sample store — not a real business.</footer>
+
+  <script src="shop.js"></script>
+  <script>
+    const id = new URLSearchParams(location.search).get('id');
+    const p = getProduct(id);
+    const container = document.getElementById('product-detail');
+
+    if (!p) {
+      container.innerHTML = '<p class="empty">Product not found. <a href="index.html">Back to shop</a>.</p>';
+    } else {
+      container.innerHTML = `
+        <p style="margin-bottom:16px"><a href="index.html">&larr; Back to shop</a></p>
+        <div class="detail">
+          <div class="hero">${p.emoji}</div>
+          <div>
+            <div class="brand">${p.brand}</div>
+            <h1>${p.name}</h1>
+            <div class="price">${money(p.price)}</div>
+            <p class="desc">${p.desc}</p>
+            <button class="btn" id="add-btn">Add to cart</button>
+            <a class="btn secondary" href="cart.html" style="margin-left:8px">Go to cart</a>
+          </div>
+        </div>`;
+
+      document.getElementById('add-btn').addEventListener('click', () => {
+        addToCart(p.id, 1);
+        const btn = document.getElementById('add-btn');
+        btn.textContent = 'Added ✓';
+        setTimeout(() => { btn.textContent = 'Add to cart'; }, 1200);
+      });
+    }
+  </script>
+</body>
+</html>
