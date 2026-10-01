@@ -56,6 +56,8 @@
           </div>
         </div>`;
 
+      track('view_item', { items: [toItem(p)] });
+
       document.getElementById('add-btn').addEventListener('click', () => {
         addToCart(p.id, 1);
         const btn = document.getElementById('add-btn');

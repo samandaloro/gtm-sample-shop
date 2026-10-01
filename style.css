@@ -86,10 +86,27 @@ h1 { font-size: 28px; margin-bottom: 8px; letter-spacing: -0.5px; }
 
 .notice { background: #e6f7ed; border: 1px solid #a3e0bd; color: #14663a; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; }
 
+/* Checkout */
+.checkout { max-width: 640px; }
+.checkout fieldset { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+.checkout fieldset:disabled { opacity: 0.5; }
+.checkout legend { font-weight: 700; padding: 0 8px; }
+.checkout .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.checkout label { display: block; font-size: 13px; color: #555; }
+.checkout label.wide { grid-column: 1 / -1; }
+.checkout input[type="text"], .checkout input[type="email"], .checkout input[type="tel"], .checkout select {
+  display: block; width: 100%; margin-top: 4px; padding: 10px 12px; font-size: 15px;
+  border: 1px solid #ccc; border-radius: 8px; background: #fff;
+}
+.checkout label.option { font-size: 15px; color: #1a1a1a; margin-bottom: 8px; }
+.checkout .actions { margin-top: 16px; }
+.summary-line { display: flex; justify-content: space-between; color: #555; margin-bottom: 8px; }
+
 footer { text-align: center; color: #aaa; font-size: 13px; padding: 40px; }
 
 @media (max-width: 720px) {
   .detail { grid-template-columns: 1fr; }
+  .checkout .fields { grid-template-columns: 1fr; }
   header { padding: 12px 16px; }
   main { padding: 16px; }
 }

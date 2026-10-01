@@ -31,10 +31,39 @@
     <div class="notice">✅ Order confirmed! (Not really — this is a test store.)</div>
     <h1>Thanks for your order</h1>
     <p class="subtitle">A confirmation would normally go to your email. <a href="index.html">Keep shopping</a>.</p>
+    <div class="cart-summary" id="order-summary" hidden>
+      <div class="summary-line"><span>Order</span><span id="order-id"></span></div>
+      <div class="summary-line"><span>Shipping</span><span id="order-shipping"></span></div>
+      <div class="total"><span>Total</span><span id="order-total"></span></div>
+    </div>
   </main>
 
   <footer>Sample store — not a real business.</footer>
 
   <script src="shop.js"></script>
+  <script>
+    let order = null;
+    try { order = JSON.parse(sessionStorage.getItem('lastOrder')); } catch (e) {}
+
+    if (order) {
+      document.getElementById('order-id').textContent = order.id;
+      document.getElementById('order-shipping').textContent = money(order.shipping);
+      document.getElementById('order-total').textContent = money(itemsValue(order.items) + order.shipping);
+      document.getElementById('order-summary').hidden = false;
+
+      // Fire purchase once per order, so refreshing this page doesn't double count.
+      // The order id doubles as event_id, keeping it stable for deduplication.
+      if (!order.tracked) {
+        track('purchase', {
+          items: order.items,
+          ecommerce: { transaction_id: order.id, shipping: order.shipping, tax: 0 },
+          user_data: order.user_data,
+          eventId: order.id
+        });
+        order.tracked = true;
+        sessionStorage.setItem('lastOrder', JSON.stringify(order));
+      }
+    }
+  </script>
 </body>
 </html>

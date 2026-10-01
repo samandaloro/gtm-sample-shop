@@ -29,7 +29,7 @@
 
   <main>
     <h1>Your Cart</h1>
-    <p class="subtitle">Checkout is fake — it just clears your cart.</p>
+    <p class="subtitle">Checkout is fake — nothing is charged and nothing ships.</p>
     <div id="cart-body"></div>
   </main>
 
@@ -71,11 +71,11 @@
       });
 
       document.getElementById('checkout-btn').addEventListener('click', () => {
-        clearCart();
-        location.href = 'thank-you.html';
+        location.href = 'checkout.html';
       });
     }
     render();
+    if (getCart().length) track('view_cart', { items: cartItems() });
   </script>
 </body>
 </html>

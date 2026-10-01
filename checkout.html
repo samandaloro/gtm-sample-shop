@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout — Moose &amp; Co.</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- GTM: paste your <head> container snippet here -->
+    <!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-MHVJKCFN');</script>
+  <!-- End Google Tag Manager -->
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MHVJKCFN"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  <header>
+    <a href="index.html" class="logo">🦌 Moose &amp; Co.</a>
+    <nav>
+      <a href="index.html">Shop</a>
+      <a href="cart.html" class="cart-link">Cart (<span id="cart-count">0</span>)</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Checkout</h1>
+    <p class="subtitle">Fake checkout — use made-up details. They are pushed to the dataLayer as <code>user_data</code> for testing Meta matching.</p>
+    <div id="checkout-body"></div>
+  </main>
+
+  <footer>Sample store — not a real business.</footer>
+
+  <script src="shop.js"></script>
+  <script>
+    const SHIPPING = { Standard: 5, Express: 15 };
+    const body = document.getElementById('checkout-body');
+    const items = cartItems();
+
+    if (items.length === 0) {
+      body.innerHTML = '<p class="empty">Your cart is empty. <a href="index.html">Start shopping</a>.</p>';
+    } else {
+      body.innerHTML = `
+        <form class="checkout" id="checkout-form">
+          <fieldset id="step-shipping">
+            <legend>1. Contact &amp; shipping</legend>
+            <div class="fields">
+              <label class="wide">Email <input type="email" name="email" required /></label>
+              <label class="wide">Phone <input type="tel" name="phone" required /></label>
+              <label>First name <input type="text" name="first_name" required /></label>
+              <label>Last name <input type="text" name="last_name" required /></label>
+              <label class="wide">Street <input type="text" name="street" required /></label>
+              <label>City <input type="text" name="city" required /></label>
+              <label>State / region <input type="text" name="region" required /></label>
+              <label>Postal code <input type="text" name="postal_code" required /></label>
+              <label>Country
+                <select name="country">
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="GB">United Kingdom</option>
+                </select>
+              </label>
+            </div>
+            ${Object.keys(SHIPPING).map((tier, i) => `
+              <label class="option"><input type="radio" name="shipping_tier" value="${tier}" ${i === 0 ? 'checked' : ''} />
+                ${tier} shipping — ${money(SHIPPING[tier])}</label>`).join('')}
+            <div class="actions">
+              <button type="button" class="btn" id="continue-btn">Continue to payment</button>
+              <button type="button" class="btn secondary" id="fill-btn" style="margin-left:8px">Fill test data</button>
+            </div>
+          </fieldset>
+
+          <fieldset id="step-payment" disabled>
+            <legend>2. Payment</legend>
+            <label class="option"><input type="radio" name="payment_type" value="Test Card" checked /> Test card (no card details needed)</label>
+            <label class="option"><input type="radio" name="payment_type" value="Pay Later" /> Pay later</label>
+            <div class="summary-line" style="margin-top:16px"><span>Subtotal</span><span>${money(itemsValue(items))}</span></div>
+            <div class="summary-line"><span>Shipping</span><span id="shipping-cost"></span></div>
+            <div class="actions">
+              <button type="submit" class="btn" id="place-order-btn">Place order</button>
+            </div>
+          </fieldset>
+        </form>`;
+
+      const form = document.getElementById('checkout-form');
+      const stepShipping = document.getElementById('step-shipping');
+      const stepPayment = document.getElementById('step-payment');
+
+      track('begin_checkout', { items });
+
+      document.getElementById('fill-btn').addEventListener('click', () => {
+        const test = {
+          email: 'test.buyer@example.com', phone: '+12025550123',
+          first_name: 'Test', last_name: 'Buyer', street: '123 Sample St',
+          city: 'Springfield', region: 'IL', postal_code: '62701', country: 'US'
+        };
+        Object.keys(test).forEach(name => { form.elements[name].value = test[name]; });
+      });
+
+      // Same shape as GA4 "user-provided data", which the Meta tags can map from.
+      // Values are sent in plain text here; the Meta Pixel / CAPI tags hash them.
+      function userData() {
+        const v = (name) => form.elements[name].value.trim();
+        return {
+          email: v('email').toLowerCase(),
+          phone_number: v('phone'),
+          address: {
+            first_name: v('first_name'), last_name: v('last_name'), street: v('street'),
+            city: v('city'), region: v('region'), postal_code: v('postal_code'), country: v('country')
+          }
+        };
+      }
+
+      document.getElementById('continue-btn').addEventListener('click', () => {
+        if (!form.reportValidity()) return;
+        const tier = form.elements.shipping_tier.value;
+        track('add_shipping_info', { items, ecommerce: { shipping_tier: tier }, user_data: userData() });
+        document.getElementById('shipping-cost').textContent = money(SHIPPING[tier]);
+        stepShipping.disabled = true;
+        stepPayment.disabled = false;
+      });
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const tier = form.elements.shipping_tier.value;
+        const user_data = userData();
+        const payment_type = form.elements.payment_type.value;
+        document.getElementById('place-order-btn').disabled = true;
+
+        track('add_payment_info', { items, ecommerce: { payment_type }, user_data });
+
+        sessionStorage.setItem('lastOrder', JSON.stringify({
+          id: 'ORD-' + Date.now().toString(36).toUpperCase(),
+          items, shipping: SHIPPING[tier], user_data, tracked: false
+        }));
+        clearCart();
+        // Short pause so add_payment_info tags can send before the page unloads.
+        setTimeout(() => { location.href = 'thank-you.html'; }, 400);
+      });
+    }
+  </script>
+</body>
+</html>
+

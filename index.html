@@ -39,7 +39,7 @@
   <script>
     const grid = document.getElementById('product-grid');
     grid.innerHTML = PRODUCTS.map(p => `
-      <a class="card" href="product.html?id=${p.id}">
+      <a class="card" href="product.html?id=${p.id}" data-id="${p.id}">
         <div class="thumb">${p.emoji}</div>
         <div class="body">
           <div class="brand">${p.brand}</div>
@@ -48,6 +48,17 @@
         </div>
       </a>
     `).join('');
+
+    const LIST = { item_list_id: 'all_products', item_list_name: 'All Products' };
+    const listItem = (p) => ({ ...toItem(p), index: PRODUCTS.indexOf(p), ...LIST });
+
+    track('view_item_list', { items: PRODUCTS.map(listItem), ecommerce: LIST });
+
+    grid.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', () => {
+        track('select_item', { items: [listItem(getProduct(card.dataset.id))], ecommerce: LIST });
+      });
+    });
   </script>
 </body>
 </html>

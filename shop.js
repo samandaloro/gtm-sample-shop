@@ -35,10 +35,17 @@ function addToCart(id, qty = 1) {
   if (existing) existing.qty += qty;
   else cart.push({ id, qty });
   saveCart(cart);
+  track('add_to_cart', { items: [toItem(getProduct(id), qty)] });
 }
 
 function removeFromCart(id) {
+  const removed = getCart().find(item => item.id === id);
   saveCart(getCart().filter(item => item.id !== id));
+  if (removed) track('remove_from_cart', { items: [toItem(getProduct(id), removed.qty)] });
+}
+
+function cartItems() {
+  return getCart().map(item => toItem(getProduct(item.id), item.qty));
 }
 
 function cartTotal() {
@@ -61,6 +68,45 @@ function updateCartCount() {
 
 function money(n) {
   return '$' + n.toFixed(2);
+}
+
+// ---- Tracking (GTM dataLayer, GA4 ecommerce schema) ----
+// Every event carries an event_id. Send the same value from the browser
+// Meta Pixel tag (eventID) and the server-side Conversions API tag so Meta
+// can deduplicate the two copies of each event.
+window.dataLayer = window.dataLayer || [];
+
+function newEventId() {
+  return crypto.randomUUID
+    ? crypto.randomUUID()
+    : Date.now() + '-' + Math.random().toString(36).slice(2);
+}
+
+function toItem(p, qty = 1) {
+  return {
+    item_id: p.id,
+    item_name: p.name,
+    item_brand: p.brand,
+    item_category: p.category,
+    price: p.price,
+    quantity: qty
+  };
+}
+
+function itemsValue(items) {
+  return Math.round(items.reduce((sum, i) => sum + i.price * i.quantity, 0) * 100) / 100;
+}
+
+// track('add_to_cart', { items })                       -> ecommerce event
+// track('purchase', { items, ecommerce: {...}, user_data, eventId })
+function track(event, { items, ecommerce = {}, eventId = newEventId(), ...rest } = {}) {
+  const payload = { event, event_id: eventId, ...rest };
+  if (items) {
+    dataLayer.push({ ecommerce: null }); // clear the previous ecommerce object
+    payload.ecommerce = { currency: CURRENCY, value: itemsValue(items), items, ...ecommerce };
+  }
+  dataLayer.push(payload);
+  console.log('[dataLayer]', event, payload);
 }
 
 document.addEventListener('DOMContentLoaded', updateCartCount);
