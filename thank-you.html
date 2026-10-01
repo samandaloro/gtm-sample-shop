@@ -52,13 +52,11 @@
       document.getElementById('order-summary').hidden = false;
 
       // Fire purchase once per order, so refreshing this page doesn't double count.
-      // The order id doubles as event_id, keeping it stable for deduplication.
       if (!order.tracked) {
         track('purchase', {
           items: order.items,
           ecommerce: { transaction_id: order.id, shipping: order.shipping, tax: 0 },
-          user_data: order.user_data,
-          eventId: order.id
+          user_data: order.user_data
         });
         order.tracked = true;
         sessionStorage.setItem('lastOrder', JSON.stringify(order));

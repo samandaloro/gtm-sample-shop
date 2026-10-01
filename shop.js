@@ -71,16 +71,9 @@ function money(n) {
 }
 
 // ---- Tracking (GTM dataLayer, GA4 ecommerce schema) ----
-// Every event carries an event_id. Send the same value from the browser
-// Meta Pixel tag (eventID) and the server-side Conversions API tag so Meta
-// can deduplicate the two copies of each event.
+// The site only pushes raw data. Anything Meta-specific (event IDs for
+// deduplication, field mapping) is left to be configured in GTM.
 window.dataLayer = window.dataLayer || [];
-
-function newEventId() {
-  return crypto.randomUUID
-    ? crypto.randomUUID()
-    : Date.now() + '-' + Math.random().toString(36).slice(2);
-}
 
 function toItem(p, qty = 1) {
   return {
@@ -98,9 +91,9 @@ function itemsValue(items) {
 }
 
 // track('add_to_cart', { items })                       -> ecommerce event
-// track('purchase', { items, ecommerce: {...}, user_data, eventId })
-function track(event, { items, ecommerce = {}, eventId = newEventId(), ...rest } = {}) {
-  const payload = { event, event_id: eventId, ...rest };
+// track('purchase', { items, ecommerce: {...}, user_data })
+function track(event, { items, ecommerce = {}, ...rest } = {}) {
+  const payload = { event, ...rest };
   if (items) {
     dataLayer.push({ ecommerce: null }); // clear the previous ecommerce object
     payload.ecommerce = { currency: CURRENCY, value: itemsValue(items), items, ...ecommerce };
