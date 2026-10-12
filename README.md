@@ -31,11 +31,12 @@ do not map form values or `user_data` into GTM or Conversions API tags.
 | Checkout page load | `begin_checkout` | `InitiateCheckout` |
 | Checkout step 1 | `add_shipping_info` | — |
 | Place order | `add_payment_info` | `AddPaymentInfo` |
-| Thank-you page | `purchase` (+ `transaction_id`) | `Purchase` |
+| Checkout submit, before redirect | `purchase` (+ `transaction_id`) | `Purchase` |
 
-`purchase` fires once per order (refreshing the thank-you page does not repeat
-it) and carries the order number as `ecommerce.transaction_id`. Events are also
-logged to the browser console as `[dataLayer] …`.
+`purchase` fires on checkout submit while the checkout form is still present,
+before redirecting to the thank-you page. It carries the order number as
+`ecommerce.transaction_id`. Events are also logged to the browser console as
+`[dataLayer] …`.
 
 The site pushes ecommerce data only. It does not set an event ID for Pixel /
 Conversions API deduplication; that is configured in GTM.

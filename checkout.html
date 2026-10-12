@@ -120,12 +120,17 @@
 
         track('add_payment_info', { items, ecommerce: { payment_type } });
 
-        sessionStorage.setItem('lastOrder', JSON.stringify({
+        const order = {
           id: 'ORD-' + Date.now().toString(36).toUpperCase(),
-          items, shipping: SHIPPING[tier], tracked: false
-        }));
+          items, shipping: SHIPPING[tier], tracked: true
+        };
+        sessionStorage.setItem('lastOrder', JSON.stringify(order));
+        track('purchase', {
+          items: order.items,
+          ecommerce: { transaction_id: order.id, shipping: order.shipping, tax: 0 }
+        });
         clearCart();
-        // Short pause so add_payment_info tags can send before the page unloads.
+        // Give GTM a short chance to send checkout and purchase tags before navigating.
         setTimeout(() => { location.href = 'thank-you.html'; }, 400);
       });
     }
