@@ -29,7 +29,7 @@
 
   <main>
     <h1>Checkout</h1>
-    <p class="subtitle">Fake checkout — use made-up details. They are pushed to the dataLayer as <code>user_data</code> for testing Meta matching.</p>
+    <p class="subtitle">Fake checkout — use made-up details. Contact details stay in the form and are never pushed to the dataLayer.</p>
     <div id="checkout-body"></div>
   </main>
 
@@ -90,35 +90,23 @@
       const stepShipping = document.getElementById('step-shipping');
       const stepPayment = document.getElementById('step-payment');
 
+      const test = {
+        email: 'test.buyer@example.com', phone: '+12025550123',
+        first_name: 'Test', last_name: 'Buyer', street: '123 Sample St',
+        city: 'Springfield', region: 'IL', postal_code: '62701', country: 'US'
+      };
+      Object.keys(test).forEach(name => { form.elements[name].value = test[name]; });
+
       track('begin_checkout', { items });
 
       document.getElementById('fill-btn').addEventListener('click', () => {
-        const test = {
-          email: 'test.buyer@example.com', phone: '+12025550123',
-          first_name: 'Test', last_name: 'Buyer', street: '123 Sample St',
-          city: 'Springfield', region: 'IL', postal_code: '62701', country: 'US'
-        };
         Object.keys(test).forEach(name => { form.elements[name].value = test[name]; });
       });
-
-      // Same shape as GA4 "user-provided data", which the Meta tags can map from.
-      // Values are sent in plain text here; the Meta Pixel / CAPI tags hash them.
-      function userData() {
-        const v = (name) => form.elements[name].value.trim();
-        return {
-          email: v('email').toLowerCase(),
-          phone_number: v('phone'),
-          address: {
-            first_name: v('first_name'), last_name: v('last_name'), street: v('street'),
-            city: v('city'), region: v('region'), postal_code: v('postal_code'), country: v('country')
-          }
-        };
-      }
 
       document.getElementById('continue-btn').addEventListener('click', () => {
         if (!form.reportValidity()) return;
         const tier = form.elements.shipping_tier.value;
-        track('add_shipping_info', { items, ecommerce: { shipping_tier: tier }, user_data: userData() });
+        track('add_shipping_info', { items, ecommerce: { shipping_tier: tier } });
         document.getElementById('shipping-cost').textContent = money(SHIPPING[tier]);
         stepShipping.disabled = true;
         stepPayment.disabled = false;
@@ -127,15 +115,14 @@
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         const tier = form.elements.shipping_tier.value;
-        const user_data = userData();
         const payment_type = form.elements.payment_type.value;
         document.getElementById('place-order-btn').disabled = true;
 
-        track('add_payment_info', { items, ecommerce: { payment_type }, user_data });
+        track('add_payment_info', { items, ecommerce: { payment_type } });
 
         sessionStorage.setItem('lastOrder', JSON.stringify({
           id: 'ORD-' + Date.now().toString(36).toUpperCase(),
-          items, shipping: SHIPPING[tier], user_data, tracked: false
+          items, shipping: SHIPPING[tier], tracked: false
         }));
         clearCart();
         // Short pause so add_payment_info tags can send before the page unloads.

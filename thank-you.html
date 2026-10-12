@@ -51,12 +51,17 @@
       document.getElementById('order-total').textContent = money(itemsValue(order.items) + order.shipping);
       document.getElementById('order-summary').hidden = false;
 
+      // Drop legacy contact data if this tab has an order from an older version.
+      if (Object.prototype.hasOwnProperty.call(order, 'user_data')) {
+        delete order.user_data;
+        sessionStorage.setItem('lastOrder', JSON.stringify(order));
+      }
+
       // Fire purchase once per order, so refreshing this page doesn't double count.
       if (!order.tracked) {
         track('purchase', {
           items: order.items,
-          ecommerce: { transaction_id: order.id, shipping: order.shipping, tax: 0 },
-          user_data: order.user_data
+          ecommerce: { transaction_id: order.id, shipping: order.shipping, tax: 0 }
         });
         order.tracked = true;
         sessionStorage.setItem('lastOrder', JSON.stringify(order));

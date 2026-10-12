@@ -91,7 +91,7 @@ function itemsValue(items) {
 }
 
 // track('add_to_cart', { items })                       -> ecommerce event
-// track('purchase', { items, ecommerce: {...}, user_data })
+// track('purchase', { items, ecommerce: {...} })
 function track(event, { items, ecommerce = {}, ...rest } = {}) {
   const payload = { event, ...rest };
   if (items) {
