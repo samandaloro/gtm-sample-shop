@@ -108,7 +108,8 @@
         const tier = form.elements.shipping_tier.value;
         track('add_shipping_info', { items, ecommerce: { shipping_tier: tier } });
         document.getElementById('shipping-cost').textContent = money(SHIPPING[tier]);
-        stepShipping.disabled = true;
+        // Keep contact fields enabled so automatic advanced matching can read them.
+        document.getElementById('continue-btn').hidden = true;
         stepPayment.disabled = false;
       });
 
@@ -131,12 +132,19 @@
 
         const order = {
           id: 'ORD-' + Date.now().toString(36).toUpperCase(),
-          items, shipping: SHIPPING[tier], customer, tracked: false
+          items, shipping: SHIPPING[tier], customer, tracked: true
         };
         sessionStorage.setItem('lastOrder', JSON.stringify(order));
+
+        // Fire purchase here, while the contact form is still on the page.
+        track('purchase', {
+          items,
+          ecommerce: { transaction_id: order.id, shipping: order.shipping, tax: 0 }
+        });
+
         clearCart();
-        // Give the checkout event a short chance to send before navigating.
-        setTimeout(() => { location.href = 'thank-you.html'; }, 400);
+        // Give the purchase tags time to send before navigating.
+        setTimeout(() => { location.href = 'thank-you.html'; }, 1000);
       });
     }
   </script>
