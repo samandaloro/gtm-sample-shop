@@ -17,10 +17,10 @@ Events follow the GA4 ecommerce schema. Each push looks like:
 ```
 
 No contact or address fields are included in dataLayer events: neither raw nor
-hashed PII is pushed. Checkout contact details remain in the form and are not
-saved with the order. To try Meta automatic advanced matching, enable it in
-your Meta Pixel settings and let the browser Pixel read eligible form fields;
-do not map form values or `user_data` into GTM or Conversions API tags.
+hashed PII is pushed. Checkout details are held in session storage for display
+on the thank-you page, where the browser Pixel may be able to detect them. To
+try Meta automatic advanced matching, enable it in your Meta Pixel settings;
+do not map form values or customer details into GTM or Conversions API tags.
 
 | Where | dataLayer event | Meta standard event |
 | --- | --- | --- |
@@ -31,10 +31,10 @@ do not map form values or `user_data` into GTM or Conversions API tags.
 | Checkout page load | `begin_checkout` | `InitiateCheckout` |
 | Checkout step 1 | `add_shipping_info` | — |
 | Place order | `add_payment_info` | `AddPaymentInfo` |
-| Checkout submit, before redirect | `purchase` (+ `transaction_id`) | `Purchase` |
+| Thank-you page, after displaying checkout details | `purchase` (+ `transaction_id`) | `Purchase` |
 
-`purchase` fires on checkout submit while the checkout form is still present,
-before redirecting to the thank-you page. It carries the order number as
+`purchase` fires once per order on the thank-you page after the order and
+checkout details render. It carries the order number as
 `ecommerce.transaction_id`. Events are also logged to the browser console as
 `[dataLayer] …`.
 

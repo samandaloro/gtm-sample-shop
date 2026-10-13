@@ -36,6 +36,13 @@
       <div class="summary-line"><span>Shipping</span><span id="order-shipping"></span></div>
       <div class="total"><span>Total</span><span id="order-total"></span></div>
     </div>
+    <section id="customer-summary" class="cart-summary" hidden aria-label="Checkout details">
+      <h2>Checkout details</h2>
+      <div class="summary-line"><span>Name</span><span id="customer-name"></span></div>
+      <div class="summary-line"><span>Email</span><span id="customer-email"></span></div>
+      <div class="summary-line"><span>Phone</span><span id="customer-phone"></span></div>
+      <div class="summary-line"><span>Address</span><span id="customer-address"></span></div>
+    </section>
   </main>
 
   <footer>Sample store — not a real business.</footer>
@@ -57,6 +64,26 @@
         sessionStorage.setItem('lastOrder', JSON.stringify(order));
       }
 
+      if (order.customer) {
+        const customer = order.customer;
+        document.getElementById('customer-name').textContent = [customer.first_name, customer.last_name].filter(Boolean).join(' ');
+        document.getElementById('customer-email').textContent = customer.email || '';
+        document.getElementById('customer-phone').textContent = customer.phone || '';
+        document.getElementById('customer-address').textContent = [
+          customer.street, customer.city, customer.region, customer.postal_code, customer.country
+        ].filter(Boolean).join(', ');
+        document.getElementById('customer-summary').hidden = false;
+      }
+
+      // Fire purchase after the checkout details are visible on this page.
+      if (!order.tracked) {
+        track('purchase', {
+          items: order.items,
+          ecommerce: { transaction_id: order.id, shipping: order.shipping, tax: 0 }
+        });
+        order.tracked = true;
+        sessionStorage.setItem('lastOrder', JSON.stringify(order));
+      }
     }
   </script>
 </body>

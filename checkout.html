@@ -118,19 +118,24 @@
         const payment_type = form.elements.payment_type.value;
         document.getElementById('place-order-btn').disabled = true;
 
+        const fieldValue = (name) => form.elements[name].value.trim();
+        const customer = {
+          email: fieldValue('email'), phone: fieldValue('phone'),
+          first_name: fieldValue('first_name'), last_name: fieldValue('last_name'),
+          street: fieldValue('street'), city: fieldValue('city'),
+          region: fieldValue('region'), postal_code: fieldValue('postal_code'),
+          country: fieldValue('country')
+        };
+
         track('add_payment_info', { items, ecommerce: { payment_type } });
 
         const order = {
           id: 'ORD-' + Date.now().toString(36).toUpperCase(),
-          items, shipping: SHIPPING[tier], tracked: true
+          items, shipping: SHIPPING[tier], customer, tracked: false
         };
         sessionStorage.setItem('lastOrder', JSON.stringify(order));
-        track('purchase', {
-          items: order.items,
-          ecommerce: { transaction_id: order.id, shipping: order.shipping, tax: 0 }
-        });
         clearCart();
-        // Give GTM a short chance to send checkout and purchase tags before navigating.
+        // Give the checkout event a short chance to send before navigating.
         setTimeout(() => { location.href = 'thank-you.html'; }, 400);
       });
     }
